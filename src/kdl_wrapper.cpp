@@ -98,8 +98,15 @@ bool KdlWrapper::store_tree_from_urdf(urdf::Model urdf_model)
 KDL::JntArray KdlWrapper::inverse_kinematics_right(KDL::Frame &frame_cart_pose, KDL::JntArray &q_seed)
 {
   KDL::JntArray q(right_arm_.getNrOfJoints());
-  int rc = ik_solver_pos_nrjl_r_->CartToJnt(q_seed, frame_cart_pose, q);
- 
+  int rc{-10};
+  while (rc != 0)
+  {
+    rc = ik_solver_pos_nrjl_r_->CartToJnt(q_seed, frame_cart_pose, q);
+    if (rc != 0)
+    {
+      adjust_q_seed(q_seed);
+    }
+  }
   if (rc != 0)
     throw std::runtime_error("Inverse solver for right arm failed, rc: " + std::to_string(rc));
   else
@@ -109,12 +116,27 @@ KDL::JntArray KdlWrapper::inverse_kinematics_right(KDL::Frame &frame_cart_pose, 
 KDL::JntArray KdlWrapper::inverse_kinematics_left(KDL::Frame &frame_cart_pose, KDL::JntArray &q_seed)
 {
   KDL::JntArray q(left_arm_.getNrOfJoints());
-  int rc = ik_solver_pos_nrjl_l_->CartToJnt(q_seed, frame_cart_pose, q);
-  
+  int rc{-10};
+  while (rc != 0)
+  {
+    rc = ik_solver_pos_nrjl_l_->CartToJnt(q_seed, frame_cart_pose, q);
+    if (rc != 0)
+    {
+      adjust_q_seed(q_seed);
+    }
+  }
   if (rc != 0)
     throw std::runtime_error("Inverse solver for left arm failed, rc: " + std::to_string(rc));
   else
     return q;
+}
+
+void KdlWrapper::adjust_q_seed(KDL::JntArray &q_seed)
+{
+  for (int i = 0; i < 7; ++i)
+  {
+    q_seed(i) += 0.01;
+  }
 }
 
 KDL::Frame KdlWrapper::forward_kinematics_right(KDL::JntArray joint_config)
