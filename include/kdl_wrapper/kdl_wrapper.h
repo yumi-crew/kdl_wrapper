@@ -1,6 +1,8 @@
 #ifndef KDL_WRAPPER_H_
 #define KDL_WRAPPER_H_
 
+#include <vector>
+
 #include <kdl_parser/kdl_parser.hpp>
 #include <urdf/model.h>
 #include <rclcpp/rclcpp.hpp>
@@ -17,6 +19,8 @@
 #include <kdl/chainiksolverpos_nr_jl.hpp>
 #include <kdl/chainiksolverpos_nr.hpp>
 #include <kdl/chainiksolverpos_lma.hpp>
+#include <kdl/chaindynparam.hpp>
+#include <kdl/jntspaceinertiamatrix.hpp>
 
 class KdlWrapper
 {
@@ -48,6 +52,19 @@ public:
 
   void print_info();
 
+  /*dynamics functions*/
+  KDL::JntSpaceInertiaMatrix dynamics_inertia(std::string mech_unit, KDL::JntArray &q);
+  KDL::JntArray dynamics_coriolis(std::string mech_unit, KDL::JntArray &q, KDL::JntArray &q_dot);
+  KDL::JntArray dynamics_gravity(std::string mech_unit, KDL::JntArray &q);
+
+  //overloads using std::vectors
+  KDL::JntSpaceInertiaMatrix dynamics_inertia(std::string mech_unit, std::vector<float> &q);
+  KDL::JntArray dynamics_coriolis(std::string mech_unit, std::vector<float> &q, std::vector<float> &q_dot);
+  KDL::JntArray dynamics_gravity(std::string mech_unit, std::vector<float> &q);
+
+  // converts std::vector<float> to KDL::JntArray
+  KDL::JntArray stdvec_to_jntarray(std::vector<float> &vec);
+
 private:
   std::shared_ptr<rclcpp::Node> node_;
   urdf::Model robot_urdf_;
@@ -77,6 +94,20 @@ private:
   KDL::JntArray joint_max_r_;
   KDL::JntArray joint_min_l_;
   KDL::JntArray joint_max_l_;
+
+  /*dynamics solvers */
+  std::shared_ptr<KDL::ChainDynParam> dynamics_solver_right_;
+  std::shared_ptr<KDL::ChainDynParam> dynamics_solver_left_;
+
+  /*dynamics matrices*/
+  KDL::JntSpaceInertiaMatrix inertia_right_;
+  KDL::JntArray coriolis_right_;
+  KDL::JntArray gravity_right_;
+  KDL::JntSpaceInertiaMatrix inertia_left_;
+  KDL::JntArray coriolis_left_;
+  KDL::JntArray gravity_left_;
+  /*gravity vector*/
+  KDL::Vector grav_{0.0, 0.0, -9.81};
 
   /* Adjust seed */
   void adjust_q_seed(KDL::JntArray &q_seed);

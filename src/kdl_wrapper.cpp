@@ -82,6 +82,16 @@ bool KdlWrapper::init()
 
   ik_solver_pos_lma_l_ = std::make_shared<KDL::ChainIkSolverPos_LMA>(left_arm_);
 
+  // initialize dynamics solvers for right and left arm
+  dynamics_solver_right_ = std::make_shared<KDL::ChainDynParam>(get_right_arm(), grav_);
+  dynamics_solver_left_ = std::make_shared<KDL::ChainDynParam>(get_left_arm(), grav_);
+
+  inertia_right_ = KDL::JntSpaceInertiaMatrix(get_right_arm().getNrOfJoints());
+  inertia_left_ = KDL::JntSpaceInertiaMatrix(get_left_arm().getNrOfJoints());
+  coriolis_right_ = KDL::JntArray(get_right_arm().getNrOfJoints());
+  coriolis_left_ = KDL::JntArray(get_left_arm().getNrOfJoints());
+  gravity_right_ = KDL::JntArray(get_right_arm().getNrOfJoints());
+  gravity_left_ = KDL::JntArray(get_left_arm().getNrOfJoints());
   return true;
 }
 
@@ -161,6 +171,67 @@ KDL::Frame KdlWrapper::forward_kinematics_left(KDL::JntArray joint_config)
   return frame;
 }
 
+KDL::JntSpaceInertiaMatrix KdlWrapper::dynamics_inertia(std::string mech_unit, KDL::JntArray &q)
+{
+  if (!mech_unit.compare("right_arm"))
+  {
+    dynamics_solver_right_->JntToMass(q, inertia_right_);
+    return inertia_right_;
+  }
+  else if (!mech_unit.compare("left_arm"))
+  {
+    dynamics_solver_left_->JntToMass(q, inertia_left_);
+    return inertia_left_;
+  }
+}
+
+KDL::JntSpaceInertiaMatrix KdlWrapper::dynamics_inertia(std::string mech_unit, std::vector<float> &q)
+{
+  KDL::JntArray q_kdl = stdvec_to_jntarray(q);
+  return dynamics_inertia(mech_unit, q_kdl);
+}
+
+KDL::JntArray KdlWrapper::dynamics_coriolis(std::string mech_unit, KDL::JntArray &q, KDL::JntArray &q_dot)
+{
+  if (!mech_unit.compare("right_arm"))
+  {
+    dynamics_solver_right_->JntToCoriolis(q, q_dot, coriolis_right_);
+    return coriolis_right_;
+  }
+  else if (!mech_unit.compare("left_arm"))
+  {
+    dynamics_solver_left_->JntToCoriolis(q, q_dot, coriolis_left_);
+    return coriolis_left_;
+  }
+}
+
+KDL::JntArray KdlWrapper::dynamics_coriolis(std::string mech_unit, std::vector<float> &q, std::vector<float> &q_dot)
+{
+  KDL::JntArray q_kdl = stdvec_to_jntarray(q);
+  KDL::JntArray q_dot_kdl = stdvec_to_jntarray(q_dot);
+  return dynamics_coriolis(mech_unit, q_kdl, q_dot_kdl);
+}
+
+KDL::JntArray KdlWrapper::dynamics_gravity(std::string mech_unit, KDL::JntArray &q)
+{
+  if (!mech_unit.compare("right_arm"))
+  {
+    dynamics_solver_right_->JntToGravity(q, gravity_right_);
+    return gravity_right_;
+  }
+  else if (!mech_unit.compare("left_arm"))
+  {
+    dynamics_solver_left_->JntToGravity(q, gravity_left_);
+    return gravity_left_;
+  }
+}
+
+KDL::JntArray KdlWrapper::dynamics_gravity(std::string mech_unit, std::vector<float> &q)
+{
+  KDL::JntArray q_kdl = stdvec_to_jntarray(q);
+  return dynamics_gravity(mech_unit, q_kdl);
+}
+
 KDL::Chain KdlWrapper::get_right_arm()
 {
   return right_arm_;
@@ -169,6 +240,14 @@ KDL::Chain KdlWrapper::get_right_arm()
 KDL::Chain KdlWrapper::get_left_arm()
 {
   return left_arm_;
+}
+
+KDL::JntArray KdlWrapper::stdvec_to_jntarray(std::vector<float> &vec)
+{
+  KDL::JntArray vec_kdl(vec.size());
+  for (int i = 0; i < vec_kdl.rows(); ++i)
+    vec_kdl(i) = vec[i];
+  return vec_kdl;
 }
 
 void KdlWrapper::print_info()
