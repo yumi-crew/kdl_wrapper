@@ -83,15 +83,22 @@ bool KdlWrapper::init()
   ik_solver_pos_lma_l_ = std::make_shared<KDL::ChainIkSolverPos_LMA>(left_arm_);
 
   // initialize dynamics solvers for right and left arm
-  dynamics_solver_right_ = std::make_shared<KDL::ChainDynParam>(get_right_arm(), grav_);
-  dynamics_solver_left_ = std::make_shared<KDL::ChainDynParam>(get_left_arm(), grav_);
+  dynamics_solver_right_ = std::make_shared<KDL::ChainDynParam>(right_arm_, grav_);
+  dynamics_solver_left_ = std::make_shared<KDL::ChainDynParam>(left_arm_, grav_);
 
-  inertia_right_ = KDL::JntSpaceInertiaMatrix(get_right_arm().getNrOfJoints());
-  inertia_left_ = KDL::JntSpaceInertiaMatrix(get_left_arm().getNrOfJoints());
-  coriolis_right_ = KDL::JntArray(get_right_arm().getNrOfJoints());
-  coriolis_left_ = KDL::JntArray(get_left_arm().getNrOfJoints());
-  gravity_right_ = KDL::JntArray(get_right_arm().getNrOfJoints());
-  gravity_left_ = KDL::JntArray(get_left_arm().getNrOfJoints());
+  jacobian_solver_right_ = std::make_shared<KDL::ChainJntToJacSolver>(right_arm_);
+  jacobian_solver_left_ = std::make_shared<KDL::ChainJntToJacSolver>(left_arm_);
+
+
+  inertia_right_ = KDL::JntSpaceInertiaMatrix(right_arm_.getNrOfJoints());
+  inertia_left_ = KDL::JntSpaceInertiaMatrix(left_arm_.getNrOfJoints());
+  coriolis_right_ = KDL::JntArray(right_arm_.getNrOfJoints());
+  coriolis_left_ = KDL::JntArray(left_arm_.getNrOfJoints());
+  gravity_right_ = KDL::JntArray(right_arm_.getNrOfJoints());
+  gravity_left_ = KDL::JntArray(left_arm_.getNrOfJoints());
+
+  jacobian_right_ = KDL::Jacobian(right_arm_.getNrOfJoints());
+  jacobian_left_ = KDL::Jacobian(left_arm_.getNrOfJoints());
   return true;
 }
 
@@ -230,6 +237,20 @@ KDL::JntArray KdlWrapper::dynamics_gravity(std::string mech_unit, std::vector<fl
 {
   KDL::JntArray q_kdl = stdvec_to_jntarray(q);
   return dynamics_gravity(mech_unit, q_kdl);
+}
+
+KDL::Jacobian KdlWrapper::calculate_jacobian(std::string mech_unit, const KDL::JntArray &q)
+{
+  if(!mech_unit.compare("right_arm"))
+  {
+    jacobian_solver_right_->JntToJac(q, jacobian_right_);
+    return jacobian_right_;
+  }
+  else if(!mech_unit.compare("left_arm"))
+  {
+    jacobian_solver_left_->JntToJac(q, jacobian_left_);
+    return jacobian_left_;
+  }
 }
 
 KDL::Chain KdlWrapper::get_right_arm()

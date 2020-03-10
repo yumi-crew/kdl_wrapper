@@ -22,6 +22,8 @@
 #include <kdl/chaindynparam.hpp>
 #include <kdl/jntspaceinertiamatrix.hpp>
 
+#include <kdl/chainjnttojacsolver.hpp>
+
 class KdlWrapper
 {
 public:
@@ -62,6 +64,8 @@ public:
   KDL::JntArray dynamics_coriolis(std::string mech_unit, std::vector<float> &q, std::vector<float> &q_dot);
   KDL::JntArray dynamics_gravity(std::string mech_unit, std::vector<float> &q);
 
+  KDL::Jacobian calculate_jacobian(std::string mech_unit, const KDL::JntArray &q);
+
   // converts std::vector<float> to KDL::JntArray
   KDL::JntArray stdvec_to_jntarray(std::vector<float> &vec);
 
@@ -99,6 +103,10 @@ private:
   std::shared_ptr<KDL::ChainDynParam> dynamics_solver_right_;
   std::shared_ptr<KDL::ChainDynParam> dynamics_solver_left_;
 
+  /*jacobian solver*/
+  std::shared_ptr<KDL::ChainJntToJacSolver> jacobian_solver_right_;
+  std::shared_ptr<KDL::ChainJntToJacSolver> jacobian_solver_left_;
+
   /*dynamics matrices*/
   KDL::JntSpaceInertiaMatrix inertia_right_;
   KDL::JntArray coriolis_right_;
@@ -108,6 +116,10 @@ private:
   KDL::JntArray gravity_left_;
   /*gravity vector*/
   KDL::Vector grav_{0.0, 0.0, -9.81};
+
+  /*jacobian*/
+  KDL::Jacobian jacobian_right_;
+  KDL::Jacobian jacobian_left_;
 
   /* Adjust seed */
   void adjust_q_seed(KDL::JntArray &q_seed);
