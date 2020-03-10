@@ -58,14 +58,13 @@ public:
   KDL::JntSpaceInertiaMatrix dynamics_inertia(std::string mech_unit, KDL::JntArray &q);
   KDL::JntArray dynamics_coriolis(std::string mech_unit, KDL::JntArray &q, KDL::JntArray &q_dot);
   KDL::JntArray dynamics_gravity(std::string mech_unit, KDL::JntArray &q);
+  KDL::Jacobian calculate_jacobian(std::string mech_unit, KDL::JntArray &q);
 
   //overloads using std::vectors
   KDL::JntSpaceInertiaMatrix dynamics_inertia(std::string mech_unit, std::vector<float> &q);
   KDL::JntArray dynamics_coriolis(std::string mech_unit, std::vector<float> &q, std::vector<float> &q_dot);
   KDL::JntArray dynamics_gravity(std::string mech_unit, std::vector<float> &q);
-
-  KDL::Jacobian calculate_jacobian(std::string mech_unit, const KDL::JntArray &q);
-
+  KDL::Jacobian calculate_jacobian(std::string mech_unit, std::vector<float> &q);
   // converts std::vector<float> to KDL::JntArray
   KDL::JntArray stdvec_to_jntarray(std::vector<float> &vec);
 

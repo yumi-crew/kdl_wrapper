@@ -239,7 +239,7 @@ KDL::JntArray KdlWrapper::dynamics_gravity(std::string mech_unit, std::vector<fl
   return dynamics_gravity(mech_unit, q_kdl);
 }
 
-KDL::Jacobian KdlWrapper::calculate_jacobian(std::string mech_unit, const KDL::JntArray &q)
+KDL::Jacobian KdlWrapper::calculate_jacobian(std::string mech_unit, KDL::JntArray &q)
 {
   if(!mech_unit.compare("right_arm"))
   {
@@ -251,6 +251,12 @@ KDL::Jacobian KdlWrapper::calculate_jacobian(std::string mech_unit, const KDL::J
     jacobian_solver_left_->JntToJac(q, jacobian_left_);
     return jacobian_left_;
   }
+}
+
+KDL::Jacobian KdlWrapper::calculate_jacobian(std::string mech_unit, std::vector<float> &q)
+{
+  KDL::JntArray q_kdl = stdvec_to_jntarray(q);
+  return calculate_jacobian(mech_unit, q);
 }
 
 KDL::Chain KdlWrapper::get_right_arm()
