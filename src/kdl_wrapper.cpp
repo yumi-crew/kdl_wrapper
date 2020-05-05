@@ -12,12 +12,12 @@ bool KdlWrapper::init()
     RCLCPP_ERROR(node_->get_logger(), "Unable to store tree from urdf file");
     return false;
   }
-  if (!robot_tree_.getChain("yumi_body", "gripper_l_center", left_arm_))
+  if (!robot_tree_.getChain("yumi_body", "gripper_l_base", left_arm_))
   {
     RCLCPP_ERROR(node_->get_logger(), "Unable to load left arm chain from tree");
     return false;
   }
-  if (!robot_tree_.getChain("yumi_body", "gripper_r_center", right_arm_))
+  if (!robot_tree_.getChain("yumi_body", "gripper_r_base", right_arm_))
   {
     RCLCPP_ERROR(node_->get_logger(), "Unable to load right arm chain from tree");
     return false;
@@ -277,6 +277,14 @@ KDL::JntArray KdlWrapper::stdvec_to_jntarray(std::vector<float> &vec)
   return vec_kdl;
 }
 
+KDL::JntArray KdlWrapper::stdvec_to_jntarray(std::vector<double> &vec)
+{
+  KDL::JntArray vec_kdl(vec.size());
+  for (int i = 0; i < vec_kdl.rows(); ++i)
+    vec_kdl(i) = vec[i];
+  return vec_kdl;
+}
+
 void KdlWrapper::print_info()
 {
   std::cout << "Number of joints on right arm: " << right_arm_.getNrOfJoints() << std::endl;
@@ -284,4 +292,16 @@ void KdlWrapper::print_info()
 
   std::cout << "Number of joints on left arm: " << left_arm_.getNrOfJoints() << std::endl;
   std::cout << "Number of segments on left arm: " << left_arm_.getNrOfSegments() << std::endl;
+}
+
+std::vector<double> KdlWrapper::jntarray_to_stdvec(KDL::JntArray& jntarray)
+{
+  int size = jntarray.rows();
+  std::vector<double> vec(size);
+
+  for(int i = 0; i < size; i++)
+  {
+    vec.push_back(jntarray(i));
+  }
+  return vec;
 }

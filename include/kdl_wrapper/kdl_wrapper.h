@@ -66,7 +66,10 @@ public:
   KDL::JntArray dynamics_gravity(std::string mech_unit, std::vector<float> &q);
   KDL::Jacobian calculate_jacobian(std::string mech_unit, std::vector<float> &q);
   // converts std::vector<float> to KDL::JntArray
+
+  KDL::JntArray stdvec_to_jntarray(std::vector<double> &vec);
   KDL::JntArray stdvec_to_jntarray(std::vector<float> &vec);
+  std::vector<double> jntarray_to_stdvec(KDL::JntArray& jntarray);
 
 private:
   std::shared_ptr<rclcpp::Node> node_;
