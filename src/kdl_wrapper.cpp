@@ -89,7 +89,6 @@ bool KdlWrapper::init()
   jacobian_solver_right_ = std::make_shared<KDL::ChainJntToJacSolver>(right_arm_);
   jacobian_solver_left_ = std::make_shared<KDL::ChainJntToJacSolver>(left_arm_);
 
-
   inertia_right_ = KDL::JntSpaceInertiaMatrix(right_arm_.getNrOfJoints());
   inertia_left_ = KDL::JntSpaceInertiaMatrix(left_arm_.getNrOfJoints());
   coriolis_right_ = KDL::JntArray(right_arm_.getNrOfJoints());
@@ -241,14 +240,19 @@ KDL::JntArray KdlWrapper::dynamics_gravity(std::string mech_unit, std::vector<fl
 
 KDL::Jacobian KdlWrapper::calculate_jacobian(std::string mech_unit, KDL::JntArray &q)
 {
-  if(!mech_unit.compare("right_arm"))
+  int ret{-10};
+  if (!mech_unit.compare("right_arm"))
   {
-    jacobian_solver_right_->JntToJac(q, jacobian_right_);
+    ret = jacobian_solver_right_->JntToJac(q, jacobian_right_);
+    if (ret != 0)
+      throw std::runtime_error("Jacobian solver for right arm failed, ret: " + std::to_string(ret));
     return jacobian_right_;
   }
-  else if(!mech_unit.compare("left_arm"))
+  else if (!mech_unit.compare("left_arm"))
   {
-    jacobian_solver_left_->JntToJac(q, jacobian_left_);
+    ret = jacobian_solver_left_->JntToJac(q, jacobian_left_);
+    if (ret != 0)
+      throw std::runtime_error("Jacobian solver for right arm failed, ret: " + std::to_string(ret));
     return jacobian_left_;
   }
 }
@@ -256,7 +260,7 @@ KDL::Jacobian KdlWrapper::calculate_jacobian(std::string mech_unit, KDL::JntArra
 KDL::Jacobian KdlWrapper::calculate_jacobian(std::string mech_unit, std::vector<float> &q)
 {
   KDL::JntArray q_kdl = stdvec_to_jntarray(q);
-  return calculate_jacobian(mech_unit, q);
+  return calculate_jacobian(mech_unit, q_kdl);
 }
 
 KDL::Chain KdlWrapper::get_right_arm()
