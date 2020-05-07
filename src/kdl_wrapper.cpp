@@ -12,12 +12,12 @@ bool KdlWrapper::init()
     RCLCPP_ERROR(node_->get_logger(), "Unable to store tree from urdf file");
     return false;
   }
-  if (!robot_tree_.getChain("yumi_body", "gripper_l_base", left_arm_))
+  if (!robot_tree_.getChain("yumi_body", "gripper_l_center", left_arm_))
   {
     RCLCPP_ERROR(node_->get_logger(), "Unable to load left arm chain from tree");
     return false;
   }
-  if (!robot_tree_.getChain("yumi_body", "gripper_r_base", right_arm_))
+  if (!robot_tree_.getChain("yumi_body", "gripper_r_center", right_arm_))
   {
     RCLCPP_ERROR(node_->get_logger(), "Unable to load right arm chain from tree");
     return false;
@@ -33,20 +33,20 @@ bool KdlWrapper::init()
   iterations_ = 1000;
 
   // Right arm joint limits
-  joint_min_r_(0) = -2.94087978961;
-  joint_max_r_(0) = 2.94087978961;
-  joint_min_r_(1) = -2.50454747661;
-  joint_max_r_(1) = 0.759218224618;
-  joint_min_r_(2) = -2.94087978961;
-  joint_max_r_(2) = 2.94087978961;
-  joint_min_r_(3) = -2.15548162621;
-  joint_max_r_(3) = 1.3962634016;
-  joint_min_r_(4) = -5.06145483078;
-  joint_max_r_(4) = 5.06145483078;
-  joint_min_r_(5) = -1.53588974176;
-  joint_max_r_(5) = 2.40855436775;
-  joint_min_r_(6) = -3.99680398707;
-  joint_max_r_(6) = 3.99680398707;
+  joint_min_r_(0) = -2.9;
+  joint_max_r_(0) = 2.9;
+  joint_min_r_(1) = -2.4;
+  joint_max_r_(1) = 0.7;
+  joint_min_r_(2) = -2.9;
+  joint_max_r_(2) = 2.9;
+  joint_min_r_(3) = -2.1;
+  joint_max_r_(3) = 1.3;
+  joint_min_r_(4) = -5.0;
+  joint_max_r_(4) = 5.0;
+  joint_min_r_(5) = -1.5;
+  joint_max_r_(5) = 2.4;
+  joint_min_r_(6) = -3.9;
+  joint_max_r_(6) = 3.9;
 
   // Left arm joint limits
   joint_min_l_ = joint_min_r_;
