@@ -1,14 +1,25 @@
-#ifndef KDL_WRAPPER_H_
-#define KDL_WRAPPER_H_
+// Copyright 2020 Norwegian University of Science and Technology.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#pragma once
 
 #include <vector>
-
 #include <kdl_parser/kdl_parser.hpp>
 #include <urdf/model.h>
 #include <rclcpp/rclcpp.hpp>
 #include <iostream>
 #include <angles/angles.h>
-
 #include <kdl/frames_io.hpp>
 #include <kdl/kdl.hpp>
 #include <kdl/chain.hpp>
@@ -21,7 +32,6 @@
 #include <kdl/chainiksolverpos_lma.hpp>
 #include <kdl/chaindynparam.hpp>
 #include <kdl/jntspaceinertiamatrix.hpp>
-
 #include <kdl/chainjnttojacsolver.hpp>
 
 class KdlWrapper
@@ -32,29 +42,29 @@ public:
   /* Setup up solvers and limits */
   bool init();
 
-  /* Inverse kinematics for right arm */
+  /* Inverse kinematics for right arm. */
   KDL::JntArray inverse_kinematics_right(KDL::Frame &frame_dest, KDL::JntArray &q_seed);
 
-  /* Inverse kinematics for left arm */
+  /* Inverse kinematics for left arm. */
   KDL::JntArray inverse_kinematics_left(KDL::Frame &frame_dest, KDL::JntArray &q_seed);
 
-  /* Forward kinematics for right arm */
+  /* Forward kinematics for right arm. */
   KDL::Frame forward_kinematics_right(KDL::JntArray joint_config);
 
-  /* Forward kinematics for right arm */
+  /* Forward kinematics for right arm. */
   KDL::Frame forward_kinematics_left(KDL::JntArray joint_config);
 
-  /* Fetch functions */
+  /* Fetch functions. */
   KDL::Chain get_right_arm();
   KDL::Chain get_left_arm();
 
-  /* set functions */
+  /* Set function.s */
   void set_iterations(double iterations) { iterations_ = iterations; }
   void set_allowed_error(double allowed_error) { allowed_error_ = allowed_error_; }
 
   void print_info();
 
-  /*dynamics functions*/
+  /* Dynamics functions. */
   KDL::JntSpaceInertiaMatrix dynamics_inertia(std::string mech_unit, KDL::JntArray &q);
   KDL::JntArray dynamics_coriolis(std::string mech_unit, KDL::JntArray &q, KDL::JntArray &q_dot);
   KDL::JntArray dynamics_gravity(std::string mech_unit, KDL::JntArray &q);
@@ -65,8 +75,8 @@ public:
   KDL::JntArray dynamics_coriolis(std::string mech_unit, std::vector<float> &q, std::vector<float> &q_dot);
   KDL::JntArray dynamics_gravity(std::string mech_unit, std::vector<float> &q);
   KDL::Jacobian calculate_jacobian(std::string mech_unit, std::vector<float> &q);
+  
   // converts std::vector<float> to KDL::JntArray
-
   KDL::JntArray stdvec_to_jntarray(std::vector<double> &vec);
   KDL::JntArray stdvec_to_jntarray(std::vector<float> &vec);
   std::vector<double> jntarray_to_stdvec(KDL::JntArray& jntarray);
@@ -130,4 +140,4 @@ private:
 
 }; //end KdlWrapper
 
-#endif //KDL_WRAPPER_H_
+
